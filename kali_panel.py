@@ -2,6 +2,7 @@ import asyncio
 import time
 import os
 import re
+import base64
 from flask import Flask, render_template_string, request, jsonify
 from telethon.sync import TelegramClient
 
@@ -13,13 +14,10 @@ API_HASH = "3b003ebf73e5e9ccdd72c5cb57af9221"
 SESSION_NAME = 'kali_mirror_session'         
 TARGET_BOT = 'Kali_Maker_Bot'                  
 
-# Create static folder for downloading multiple images
-os.makedirs('static', exist_ok=True)
-
 app = Flask(__name__)
 
 # ==========================================
-# 🎨 UI CODE (PREMIUM WHITE + MOBILE FIX)
+# 🎨 UI CODE (PREMIUM WHITE + ANDROID FIXES)
 # ==========================================
 HTML_CODE = """
 <!DOCTYPE html>
@@ -53,34 +51,34 @@ HTML_CODE = """
             display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
         }
 
-        .panel-header { padding: 20px 25px 15px 25px; border-bottom: 1px solid #f1f5f9; }
+        .panel-header { padding: 25px 25px 15px 25px; border-bottom: 1px solid #f1f5f9; }
         .brand-title { font-size: 20px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; }
         .brand-icon { background: #3b82f6; color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 
         .controls-area {
-            padding: 20px 25px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px;
+            padding: 25px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 25px;
         }
         .controls-area::-webkit-scrollbar { width: 4px; }
         .controls-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group { display: flex; flex-direction: column; gap: 10px; }
         .section-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
         
         .custom-input {
             width: 100%; background: #f8fafc; border: 2px solid #e2e8f0; color: #0f172a;
-            padding: 12px 15px; border-radius: 12px; font-family: inherit; font-size: 14px;
+            padding: 14px 15px; border-radius: 12px; font-family: inherit; font-size: 14px;
             outline: none; transition: 0.3s; font-weight: 500;
         }
         .custom-input:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
         
         .btn-send {
-            width: 100%; background: #0f172a; color: #fff; border: none; padding: 12px;
+            width: 100%; background: #0f172a; color: #fff; border: none; padding: 14px;
             border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.3s;
         }
         .btn-send:hover { background: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
 
         .dynamic-buttons-container { display: flex; flex-direction: column; gap: 10px; }
-        .btn-row { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
+        .btn-row { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
         
         .action-btn {
             flex: 1; min-width: 45%; background: #ffffff; border: 1px solid #cbd5e1;
@@ -91,8 +89,8 @@ HTML_CODE = """
         .action-btn:hover { background: #eff6ff; border-color: #3b82f6; color: #2563eb; transform: translateY(-1px); }
 
         .btn-restart {
-            margin: 15px 25px; background: #fef2f2; color: #ef4444; border: 1px solid #fecaca;
-            padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
+            margin: 20px 25px; background: #f1f5f9; color: #ef4444; border: 1px solid #fecaca;
+            padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;
             transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-restart:hover { background: #fee2e2; color: #b91c1c; }
@@ -129,7 +127,7 @@ HTML_CODE = """
         .result-card {
             background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
             padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            font-family: inherit; font-size: 15px; line-height: 1.8; color: #1e293b; 
+            font-family: inherit; font-size: 14px; line-height: 1.8; color: #1e293b; 
             white-space: pre-wrap; word-wrap: break-word; border-left: 4px solid #3b82f6;
         }
         
@@ -144,14 +142,14 @@ HTML_CODE = """
         .success-block {
             background: #f0fdf4; border: 2px solid #10b981; border-top: none; 
             border-radius: 0 0 12px 12px; padding: 20px; margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15); font-weight: 500;
         }
 
         .result-card a { color: #3b82f6; text-decoration: none; font-weight: 600; background: #eff6ff; padding: 2px 6px; border-radius: 4px; border: 1px dashed #bfdbfe;}
         .result-card a:hover { color: #2563eb; background: #dbeafe; text-decoration: underline; }
 
         .media-box { margin: 15px 0; text-align: center; }
-        .media-box img { max-width: 100%; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .media-box img { max-width: 100%; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
         .loader-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -163,12 +161,11 @@ HTML_CODE = """
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-        /* 📱 MOBILE RESPONSIVE (FIXED FOR ANDROID) */
+        /* 📱 MOBILE RESPONSIVE (FIXED SCROLL & LAYOUT) */
         @media (max-width: 850px) {
             body { padding: 0; background: #f8fafc; }
             .dashboard-wrapper { flex-direction: column; gap: 0; height: 100vh; max-height: 100vh; border-radius: 0; }
             
-            /* Left Panel Fix: Gave it a defined max-height so it scrolls nicely */
             .left-panel { 
                 width: 100%; border-radius: 0; border: none; border-bottom: 2px solid #e2e8f0; 
                 box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 5; 
@@ -176,19 +173,12 @@ HTML_CODE = """
             }
             .panel-header { padding: 15px 20px 10px 20px; }
             .brand-title { font-size: 18px; }
-            
             .controls-area { padding: 10px 20px; gap: 15px; overflow-y: auto; }
-            
-            /* RESTART BUTTON VISIBLE ON MOBILE NOW */
-            .btn-restart { 
-                display: flex; margin: 10px 20px 15px 20px; padding: 12px; 
-                font-size: 13px; font-weight: 700; flex-shrink: 0;
-            } 
+            .btn-restart { display: flex; margin: 10px 20px 15px 20px; padding: 12px; font-size: 13px; font-weight: 700; flex-shrink: 0;} 
 
-            /* Right Panel Fix */
             .right-panel { border-radius: 0; border: none; box-shadow: none; flex: 1; display: flex; flex-direction: column; }
             .result-header { padding: 15px 20px; flex-wrap: wrap; gap: 10px;}
-            .result-body { padding: 20px; padding-bottom: 40px; overflow-y: auto; }
+            .result-body { padding: 15px; padding-bottom: 40px; overflow-y: auto; }
             .result-card { font-size: 13px; padding: 15px; }
         }
     </style>
@@ -243,7 +233,7 @@ HTML_CODE = """
     <script>
         let currentMsgId = null;
         let pollTimer = null;
-        let lastCopyText = "";
+        let lastCopyText = ""; 
 
         window.onload = () => { 
             fetchLatest(true); 
@@ -285,15 +275,46 @@ HTML_CODE = """
             interact('text', val);
         }
 
+        // 💥 UNIVERSAL COPY FUNCTION (Works on all Androids 100%)
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                var successful = document.execCommand('copy');
+                if(successful) alert('✅ Copied Successfully!');
+                else alert('❌ Failed to copy link.');
+            } catch (err) {
+                alert('❌ Failed to copy link.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function smartCopy(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('✅ Copied Successfully!');
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
         function clickButton(btnText, url = null) {
+            // FIX: Smart Link Copier Mobile Support
             if (btnText.toLowerCase().includes('copy')) {
                 let urls = lastCopyText.match(/https?:\\/\\/[^\\s]+/g);
                 if (urls && urls.length > 0) {
-                    navigator.clipboard.writeText(urls[0]); 
-                    alert('✅ Link Copied Successfully!');
+                    smartCopy(urls[0]); // Copies only the URL
                 } else {
-                    navigator.clipboard.writeText(lastCopyText); 
-                    alert('✅ Copied Successfully!');
+                    smartCopy(lastCopyText); // Copies all text if URL not found
                 }
                 return; 
             }
@@ -332,16 +353,24 @@ HTML_CODE = """
             return inputText.replace(replacePattern1, '<a href="$1" target="_blank" title="Click to Open">$1</a>');
         }
 
+        // FULL DATA COPY FUNCTION
         function copyResult() {
-            navigator.clipboard.writeText(lastCopyText).then(() => {
-                let btn = document.getElementById('copyBtn');
-                btn.innerHTML = '✅ Copied!';
-                btn.className = 'btn-copy success';
-                setTimeout(() => {
-                    btn.innerHTML = '📋 Copy Data';
-                    btn.className = 'btn-copy';
-                }, 2000);
-            });
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(lastCopyText).then(() => showCopySuccess());
+            } else {
+                fallbackCopyTextToClipboard(lastCopyText);
+                showCopySuccess();
+            }
+        }
+
+        function showCopySuccess() {
+            let btn = document.getElementById('copyBtn');
+            btn.innerHTML = '✅ Copied!';
+            btn.className = 'btn-copy success';
+            setTimeout(() => {
+                btn.innerHTML = '📋 Copy Data';
+                btn.className = 'btn-copy';
+            }, 2000);
         }
 
         function renderBotState(data) {
@@ -364,6 +393,7 @@ HTML_CODE = """
                             htmlText += `<div class="normal-block">${formattedLine}</div>`;
                         }
                     } else if (item.type === 'photo') {
+                        // Direct base64 image rendering
                         htmlText += `<div class="media-box"><img src="${item.content}" alt="Captured Media"></div>`;
                     }
                 });
@@ -409,7 +439,7 @@ def index():
     return render_template_string(HTML_CODE)
 
 # ==========================================
-# 🚀 CORE ENGINE: FETCH MULTIPLE MESSAGES + REPLACE NAME
+# 🚀 CORE ENGINE: FETCH MULTIPLE MESSAGES + BASE64 IMAGES
 # ==========================================
 def replace_names(text):
     text = re.sub(r'(?i)(Developed by:|First Version :)\s*@[A-Za-z0-9_]+', r'\1 made by anup', text)
@@ -417,12 +447,13 @@ def replace_names(text):
     text = text.replace("@Kali_Linux_Robot", "made by anup")
     text = text.replace("@Kali_Maker_Bot", "made by anup")
     
-    text = text.replace("Developed by: made by anup", "made by anup ❤️")
-    text = text.replace("First Version : made by anup", "made by anup ❤️")
+    text = text.replace("Developed by: made by anup", "made by anup")
+    text = text.replace("First Version : made by anup", "made by anup")
     return text
 
 def get_latest_bot_state(client):
-    msgs = client.get_messages(TARGET_BOT, limit=15)
+    # Limit badha di taaki bada data miss na ho
+    msgs = client.get_messages(TARGET_BOT, limit=20)
     
     bot_cluster = []
     for m in msgs:
@@ -448,10 +479,15 @@ def get_latest_bot_state(client):
             items.append({"type": "text", "content": txt})
             
         if m.photo:
-            filename = f"static/img_{m.id}.jpg"
-            if not os.path.exists(filename):
-                client.download_media(m.media, file=filename)
-            items.append({"type": "photo", "content": '/' + filename})
+            # FIX: Base64 encoding. Ab file save nahi hogi, direct data HTML me jayega (100% Works on Android)
+            try:
+                img_bytes = client.download_media(m.media, file=bytes)
+                if img_bytes:
+                    base64_encoded = base64.b64encode(img_bytes).decode('utf-8')
+                    base64_img = f"data:image/jpeg;base64,{base64_encoded}"
+                    items.append({"type": "photo", "content": base64_img})
+            except Exception as e:
+                print(f"Image Download Error: {e}")
             
         if m.buttons:
             buttons = [] 
