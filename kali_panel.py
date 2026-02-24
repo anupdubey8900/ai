@@ -19,7 +19,7 @@ os.makedirs('static', exist_ok=True)
 app = Flask(__name__)
 
 # ==========================================
-# 🎨 UI CODE (PREMIUM WHITE + SMART SEPARATION)
+# 🎨 UI CODE (PREMIUM WHITE + MOBILE FIX)
 # ==========================================
 HTML_CODE = """
 <!DOCTYPE html>
@@ -53,34 +53,34 @@ HTML_CODE = """
             display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
         }
 
-        .panel-header { padding: 25px 25px 15px 25px; border-bottom: 1px solid #f1f5f9; }
+        .panel-header { padding: 20px 25px 15px 25px; border-bottom: 1px solid #f1f5f9; }
         .brand-title { font-size: 20px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; }
         .brand-icon { background: #3b82f6; color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 
         .controls-area {
-            padding: 25px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 25px;
+            padding: 20px 25px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px;
         }
         .controls-area::-webkit-scrollbar { width: 4px; }
         .controls-area::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-        .input-group { display: flex; flex-direction: column; gap: 10px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
         .section-label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
         
         .custom-input {
             width: 100%; background: #f8fafc; border: 2px solid #e2e8f0; color: #0f172a;
-            padding: 14px 15px; border-radius: 12px; font-family: inherit; font-size: 14px;
+            padding: 12px 15px; border-radius: 12px; font-family: inherit; font-size: 14px;
             outline: none; transition: 0.3s; font-weight: 500;
         }
         .custom-input:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
         
         .btn-send {
-            width: 100%; background: #0f172a; color: #fff; border: none; padding: 14px;
+            width: 100%; background: #0f172a; color: #fff; border: none; padding: 12px;
             border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.3s;
         }
         .btn-send:hover { background: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); }
 
         .dynamic-buttons-container { display: flex; flex-direction: column; gap: 10px; }
-        .btn-row { display: flex; gap: 10px; width: 100%; flex-wrap: wrap; }
+        .btn-row { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
         
         .action-btn {
             flex: 1; min-width: 45%; background: #ffffff; border: 1px solid #cbd5e1;
@@ -91,8 +91,8 @@ HTML_CODE = """
         .action-btn:hover { background: #eff6ff; border-color: #3b82f6; color: #2563eb; transform: translateY(-1px); }
 
         .btn-restart {
-            margin: 20px 25px; background: #f1f5f9; color: #ef4444; border: 1px solid #fecaca;
-            padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;
+            margin: 15px 25px; background: #fef2f2; color: #ef4444; border: 1px solid #fecaca;
+            padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;
             transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-restart:hover { background: #fee2e2; color: #b91c1c; }
@@ -124,7 +124,7 @@ HTML_CODE = """
         .status-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
         .status-badge.loading .status-dot { background: #eab308; animation: pulse 1s infinite; }
 
-        .result-body { flex: 1; padding: 25px; overflow-y: auto; background: #f8fafc; }
+        .result-body { flex: 1; padding: 30px; overflow-y: auto; background: #f8fafc; }
         
         .result-card {
             background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;
@@ -133,10 +133,7 @@ HTML_CODE = """
             white-space: pre-wrap; word-wrap: break-word; border-left: 4px solid #3b82f6;
         }
         
-        /* 🔥 SEPARATION CLASSES FOR DETAILS 🔥 */
-        .normal-block {
-            margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px dashed #cbd5e1;
-        }
+        .normal-block { margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px dashed #cbd5e1; }
         .normal-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         
         .success-banner {
@@ -166,20 +163,33 @@ HTML_CODE = """
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-        /* 📱 MOBILE RESPONSIVE */
+        /* 📱 MOBILE RESPONSIVE (FIXED FOR ANDROID) */
         @media (max-width: 850px) {
             body { padding: 0; background: #f8fafc; }
             .dashboard-wrapper { flex-direction: column; gap: 0; height: 100vh; max-height: 100vh; border-radius: 0; }
             
-            .left-panel { width: 100%; border-radius: 0; border: none; border-bottom: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 5; max-height: 55vh; }
-            .panel-header { padding: 15px 20px; }
-            .controls-area { padding: 15px 20px; gap: 15px; }
-            .btn-restart { display: none; } 
+            /* Left Panel Fix: Gave it a defined max-height so it scrolls nicely */
+            .left-panel { 
+                width: 100%; border-radius: 0; border: none; border-bottom: 2px solid #e2e8f0; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05); z-index: 5; 
+                max-height: 55vh; display: flex; flex-direction: column; flex-shrink: 0;
+            }
+            .panel-header { padding: 15px 20px 10px 20px; }
+            .brand-title { font-size: 18px; }
+            
+            .controls-area { padding: 10px 20px; gap: 15px; overflow-y: auto; }
+            
+            /* RESTART BUTTON VISIBLE ON MOBILE NOW */
+            .btn-restart { 
+                display: flex; margin: 10px 20px 15px 20px; padding: 12px; 
+                font-size: 13px; font-weight: 700; flex-shrink: 0;
+            } 
 
-            .right-panel { border-radius: 0; border: none; box-shadow: none; flex: 1; }
+            /* Right Panel Fix */
+            .right-panel { border-radius: 0; border: none; box-shadow: none; flex: 1; display: flex; flex-direction: column; }
             .result-header { padding: 15px 20px; flex-wrap: wrap; gap: 10px;}
-            .result-body { padding: 20px; padding-bottom: 40px; }
-            .result-card { font-size: 14px; padding: 15px; }
+            .result-body { padding: 20px; padding-bottom: 40px; overflow-y: auto; }
+            .result-card { font-size: 13px; padding: 15px; }
         }
     </style>
 </head>
@@ -205,14 +215,14 @@ HTML_CODE = """
                     </div>
                 </div>
             </div>
-            <button class="btn-restart" onclick="interact('start', '')">🔄 Restart Bot Session (Clear All)</button>
+            <button class="btn-restart" onclick="interact('start', '')">🔄 Restart Session</button>
         </div>
 
         <div class="right-panel">
             <div class="result-header">
                 <div class="result-title">📄 Extracted Result</div>
                 <div class="header-actions">
-                    <button class="btn-copy" id="copyBtn" onclick="copyResult()">📋 Copy Details</button>
+                    <button class="btn-copy" id="copyBtn" onclick="copyResult()">📋 Copy Data</button>
                     <div class="status-badge" id="statusBadge"><div class="status-dot"></div> <span id="statusText">Listening Live...</span></div>
                 </div>
             </div>
@@ -233,7 +243,7 @@ HTML_CODE = """
     <script>
         let currentMsgId = null;
         let pollTimer = null;
-        let lastCopyText = ""; // Global variable for flawless copying
+        let lastCopyText = "";
 
         window.onload = () => { 
             fetchLatest(true); 
@@ -276,7 +286,6 @@ HTML_CODE = """
         }
 
         function clickButton(btnText, url = null) {
-            // FIX: Smart Link Copier
             if (btnText.toLowerCase().includes('copy')) {
                 let urls = lastCopyText.match(/https?:\\/\\/[^\\s]+/g);
                 if (urls && urls.length > 0) {
@@ -323,14 +332,13 @@ HTML_CODE = """
             return inputText.replace(replacePattern1, '<a href="$1" target="_blank" title="Click to Open">$1</a>');
         }
 
-        // FLAWLESS COPY LOGIC (Using Raw Text)
         function copyResult() {
             navigator.clipboard.writeText(lastCopyText).then(() => {
                 let btn = document.getElementById('copyBtn');
                 btn.innerHTML = '✅ Copied!';
                 btn.className = 'btn-copy success';
                 setTimeout(() => {
-                    btn.innerHTML = '📋 Copy Details';
+                    btn.innerHTML = '📋 Copy Data';
                     btn.className = 'btn-copy';
                 }, 2000);
             });
@@ -338,7 +346,7 @@ HTML_CODE = """
 
         function renderBotState(data) {
             let htmlText = '';
-            lastCopyText = ''; // Reset copy text
+            lastCopyText = ''; 
 
             if(data.items && data.items.length > 0) {
                 data.items.forEach(item => {
@@ -346,7 +354,6 @@ HTML_CODE = """
                         lastCopyText += item.content + '\\n\\n';
                         let formattedLine = linkify(item.content).replace(/\\n/g, '<br>');
                         
-                        // 🔥 HIGHLIGHT TARGET DATA 🔥
                         let keywords = ["Visitor Information Captured", "New Login Detected", "GPS Coordinates", "Target:", "Account:", "Password:"];
                         let isTargetData = keywords.some(k => item.content.includes(k));
                         
@@ -366,7 +373,6 @@ HTML_CODE = """
 
             document.getElementById('resultBody').innerHTML = `<div class="result-card" id="rawTextData">${htmlText}</div>`;
             
-            // LEFT PANEL BUTTONS
             let btnHtml = '';
             if(data.buttons && data.buttons.length > 0) {
                 data.buttons.forEach(row => {
@@ -406,23 +412,19 @@ def index():
 # 🚀 CORE ENGINE: FETCH MULTIPLE MESSAGES + REPLACE NAME
 # ==========================================
 def replace_names(text):
-    """Badi safai se developer ka naam hata kar 'made by anup' likhta hai"""
     text = re.sub(r'(?i)(Developed by:|First Version :)\s*@[A-Za-z0-9_]+', r'\1 made by anup', text)
     text = text.replace("@Kaliboy002", "made by anup")
     text = text.replace("@Kali_Linux_Robot", "made by anup")
     text = text.replace("@Kali_Maker_Bot", "made by anup")
     
-    # Clean formatting
-    text = text.replace("Developed by: made by anup", "  Made By Anup ❤️")
-    text = text.replace("First Version : made by anup", "made by anup")
+    text = text.replace("Developed by: made by anup", "made by anup ❤️")
+    text = text.replace("First Version : made by anup", "made by anup ❤️")
     return text
 
 def get_latest_bot_state(client):
-    # Pichle 15 messages fetch karta hai
     msgs = client.get_messages(TARGET_BOT, limit=15)
     
     bot_cluster = []
-    # Loop tab tak chalega jab tak aapka (user) bheja hua message na mil jaye
     for m in msgs:
         if m.out: 
             break
@@ -434,7 +436,6 @@ def get_latest_bot_state(client):
     if not bot_cluster:
         return {"items": [], "buttons": [], "msg_id": None}
 
-    # Asli order me lane ke liye list ko ulta (reverse) karte hain
     bot_cluster.reverse()
 
     items = []
@@ -453,7 +454,7 @@ def get_latest_bot_state(client):
             items.append({"type": "photo", "content": '/' + filename})
             
         if m.buttons:
-            buttons = [] # Hamesha sabse latest buttons hi dikhayenge
+            buttons = [] 
             for row in m.buttons:
                 buttons.append([{"text": b.text, "url": b.url if hasattr(b, 'url') else None} for b in row])
 
@@ -522,7 +523,7 @@ def interact():
             result = get_latest_bot_state(client)
 
     except Exception as e:
-        print(f"❌ ERROR: {e}")
+        pass
     finally:
         new_loop.close()
         
