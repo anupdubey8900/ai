@@ -5,6 +5,7 @@ import re
 import base64
 from flask import Flask, render_template_string, request, jsonify
 from telethon.sync import TelegramClient
+from flask_cloudflared import run_with_cloudflared
 
 # ==========================================
 # ⚙️ CONFIGURATION
@@ -15,6 +16,8 @@ SESSION_NAME = 'kali_mirror_session'
 TARGET_BOT = 'Kali_Maker_Bot'                  
 
 app = Flask(__name__)
+app = Flask(__name__)
+run_with_cloudflared(app)  # Ye line apke liye auto-link banayegi!
 
 # ==========================================
 # 🎨 UI CODE (PREMIUM WHITE + ANDROID FIXES)
