@@ -606,6 +606,18 @@ if __name__ == '__main__':
     
     print("\n" + "="*50)
     print("🚀 FULL DATA MIRROR ENGINE RUNNING!")
+    print("="*50 + "\n")
+    
+    # 🔥 RENDER.COM PORT FIX 🔥
+    # Ye line Render ka automatic port utha legi
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False, threaded=False)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(login_system())
+    
+    print("\n" + "="*50)
+    print("🚀 FULL DATA MIRROR ENGINE RUNNING!")
     print("👉 OPEN BROWSER AND TYPE: http://127.0.0.1:5000")
     print("="*50 + "\n")
     
